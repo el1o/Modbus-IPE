@@ -1,0 +1,68 @@
+class Register {
+    constructor(name, slave, address, length, scale, value){
+        if (new.target === Register) {
+            throw new TypeError("Cannot construct Register instances directly");
+        }
+        this.name = name;
+        this.address = address;
+        this.length = length;
+        this.slave = slave;
+        this.scale = scale;
+        this.value = value;
+    }
+    getName(){
+        return this.name;
+    }
+}
+
+export class DiscreteInput extends Register{
+    constructor(name, slave, address, length, scale, value){
+        super(name, slave, address, length, scale, value)
+    }
+    async read(){
+        try {
+            return  this.slave.readCoils(this.address, this.length);
+        } catch (e) {
+            console.log(e.message)
+        }
+    }
+}
+
+export class Coil extends Register{
+    constructor(name, slave, address, length, scale, value){
+        super(name, slave, address, length, scale, value)
+    }
+    async read(){
+        try {
+            return  this.slave.readCoils(this.address, this.length);
+        } catch (e) {
+            console.log(e.message)
+        }
+    }
+}
+
+export class InputRegister extends Register{
+    constructor(name, slave, address, length, scale, value){
+        super(name, slave, address, length, scale, value)
+    }
+    async read(){
+        try {
+            return  this.slave.readInputRegisters(this.address, this.length);
+        } catch (e) {
+            console.log(e.message)
+        }
+    }
+}
+
+export class HoldingRegister extends Register{
+    constructor(name, slave, address, length, scale, value){
+        super(name, slave, address, length, scale, value)
+    }
+    async read(){
+        try {
+            return  this.slave.readHoldingRegisters(this.address, this.length);
+        } catch (e) {
+            console.log(e.message)
+        }
+    }
+}
