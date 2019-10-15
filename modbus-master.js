@@ -1,27 +1,38 @@
-import {DiscreteInput, Coil, HoldingRegister, InputRegister} from './register'
-import registers from './registers-list'
+import {Coil, DiscreteInput, HoldingRegister, InputRegister} from './register'
+import {monitoringRegisters, writeRegisters} from './registers-list'
 
 export function monitor(slave, interval, callback) {
     setInterval(() => readRegisters(slave, callback), interval)
 }
 
 function readRegisters(slave, callback){
-    let regs = [];
-    let readValues = {};
-    for (let module in registers){
-        for (let dataPoint in registers[module]){
-            regs.push(createRegisterObject(dataPoint, slave, registers[module][dataPoint]));
+    let regs = {
+        battery: [],
+        energyGeneration: [],
+        energyConsumption: []
+    };
+    let readValues = {
+        battery: {},
+        energyGeneration: {},
+        energyConsumption: {}
+    };
+
+    for (let module in monitoringRegisters){
+        for (let dataPoint in monitoringRegisters[module]){
+            regs[module].push(createRegisterObject(dataPoint, slave, monitoringRegisters[module][dataPoint]));
         }
     }
     (async () => {
-        for (let reg of regs){
-            try{
-                const {data} = await reg.read();
-                readValues[reg.getName()] = (reg.scale == null) ? data[0] : data[0]/reg.scale //TODO considers only 1st register
-            } catch (e) {
-                console.log(e);
+        for (let module in regs)
+            for (let reg of regs[module]){
+                try{
+                    const {data} = await reg.read();
+                    // console.log(module + ' ' + reg.getName() + ': ' + data);
+                    readValues[module][reg.getName()] = (reg.scale == null) ? data[0] : data[0]/reg.scale //TODO considers only 1st register
+                } catch (e) {
+                    // console.log(e);
+                }
             }
-        }
         return callback(readValues);
     })();
 }
@@ -41,8 +52,21 @@ function createRegisterObject(name, slave, {type, address, length, scale}) {
     }
 }
 
-// connect().then(slave => {
-//     monitor(slave, 6000);
-// }).catch(e => {
-//     console.log("Could not connect to slave device", e)
-// });
+export async function writeCharging(slave, value) {
+    const reg = createRegisterObject('charging', slave, writeRegisters.charging);
+    try {
+        return await reg.write(value);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+export async function writeDischarging(slave, value) {
+    const reg = createRegisterObject('discharging', slave, writeRegisters.discharging);
+
+    try {
+        return await reg.write(value);
+    } catch (e) {
+        console.log(e);
+    }
+}

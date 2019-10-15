@@ -2,9 +2,17 @@ import request from 'request-promise';
 import {cseUrl, fcntUrls} from './config'
 
 export async function uploadMonitoringData(data) {
+    for (const module in fcntUrls) {
+        // console.log(module + ': ' + JSON.stringify(data[module]));
+        await updateFlexContainer(cseUrl.concat(fcntUrls[module]), data[module])
+    }
+    // await updateFlexContainer(cseUrl.concat(fcntUrls['battery']), data['battery'])
+}
+
+async function updateFlexContainer(url, data) {
     let options = {
         method: 'PUT',
-        uri: cseUrl.concat(fcntUrls.battery),
+        uri: url,
         port: 8080,
         body: {
             "m2m:fcnt": data

@@ -21,20 +21,27 @@ export class DiscreteInput extends Register{
     }
     async read(){
         try {
-            return  this.slave.readCoils(this.address, this.length);
+            return  this.slave.readDiscreteInputs(this.address, this.length);
         } catch (e) {
             console.log(e.message)
         }
     }
 }
 
-export class Coil extends Register{
+export class Coil extends Register {
     constructor(name, slave, address, length, scale, value){
         super(name, slave, address, length, scale, value)
     }
     async read(){
         try {
             return  this.slave.readCoils(this.address, this.length);
+        } catch (e) {
+            console.log(e.message)
+        }
+    }
+    async write(value){
+        try {
+            return  this.slave.writeCoil(this.address, value);
         } catch (e) {
             console.log(e.message)
         }
@@ -61,6 +68,14 @@ export class HoldingRegister extends Register{
     async read(){
         try {
             return  this.slave.readHoldingRegisters(this.address, this.length);
+        } catch (e) {
+            console.log(e.message)
+        }
+    }
+
+    async write(value){
+        try {
+            return  this.slave.writeRegister(this.address, value);
         } catch (e) {
             console.log(e.message)
         }
